@@ -2,12 +2,14 @@
 Herein, we go back a few years when the origin of _Plasmodium falciparum_ was still not clear. Answers to questions and our workflow/scripts will be added to this `README`.
 
 ## Programs used for this analysis
-All programs installed succesfully through `mamba` and their versions
+All programs were installed through `mamba` except for `GeneMark-ES`. It was already installed on the server.
 ```
-#Name           Version         Channel
-bbmap           39.06           bioconda
-seqkit          2.7.0           bioconda
-
+#Name                   Version         Channel
+bbmap                   39.06           bioconda
+seqkit                  2.7.0           bioconda
+GeneMark-ES             4.71            N/A
+diamond                 2.1.9           bioconda
+diamond_add_taxonomy    0.1.2           bioconda
 ```
 
 ## Setting the scene
@@ -172,9 +174,9 @@ gc_dist <- raw %>%
        x = "GC content",
        y = "Density") +
   geom_vline(xintercept = 31.5, linetype = "dashed", color = "black") +
-  annotate("text", x = 10, y = 0.04, label = "H. tartakovskyi", color = "black", 
+  annotate("text", x = 14, y = 0.052, label = "H. tartakovskyi", color = "black", 
            size = 4) +
-  annotate("text", x = 45, y = 0.03, label = "Avian host", color = "black", 
+  annotate("text", x = 44, y = 0.03, label = "Avian host", color = "black", 
            size = 4) +
   theme_bw() +
   fig
@@ -185,16 +187,22 @@ ggsave("figures/gc_dist.png", plot = gc_dist, width = 8, height = 6, units = "in
 ```
 ![GC% Distribution](figures/gc_dist.png)
 
-We expect **Ht** to have a lesse GC% than the avian host. Hence, we set the GC threshold as 30 and keep everything that is below.
+We expect **Ht** to have a less GC% than the avian host. Hence, we set the GC threshold as 30 and keep everything that is below.
 
-### Filtering
+### Hard Filtering
 We had 15048 contigs originally and after filtering we have 2222 contigs with an GC-content of 25.68 % (compared to 27.40 % we had before).
 ```
 # Get the contig ids that meet thresholds.
 awk '$2 >= 3000 && $3 < 30 {print $1}' 02_DE-HOST/raw_contig_stats.tsv > 02_DE-HOST/keep_ids.txt
 
 # Generate new fasta using said contig ids.
-seqkit grep --threads 24 -f keep_ids.txt 00_RAW/Haemoproteus_tartakovskyi.raw.genome.gz > 02_DE-HOST/contigs-deHOST.fasta
+seqkit grep --threads 24 -f keep_ids.txt 00_RAW/Haemoproteus_tartakovskyi.raw.genome.gz > 02_DE-HOST/tmp.contigs-deHOST.fasta
+
+# Lastly, lets change the headers so we dont have the `length`and `numreads`.
+awk '/^>/ {$0=$1} {print}' 02_DE-HOST/tmp.contigs-deHOST.fasta > 02_DE-HOST/contigs-deHOST.fasta
+
+# Remove tmp
+rm 02_DE-HOST/tmp.contigs_deHost.fasta
 ```
 Here we see the summary statistics of our decontaminated assembly.
 ```
@@ -228,4 +236,21 @@ Length          Scaffolds       Contigs         Length          Length          
   25 KB                     33              33       1,033,424       1,033,424   100.00%
   50 KB                      1               1          64,494          64,494   100.00%
 ```
+## Host-Decontamination using `DIAMOND` and `Swissprot`
+To make sure we do not have any more host contamination we will use `DIAMOND` and `diamond_add_taxonomy` to classify our contigs based of the alignments against the `Swissprot` database. However, we first need to predict genes!
 
+### Why?
+Our hard filtering removed what we expect to be biologically irrelevent (small contig size) and contigs we expect to be avian based on GC-content. To increase our confidence we can utilize the annotated databases. Specifically, we want to use protein databases and not **genome**. Genomes would be a very computational heavy process, while proteins will be less as the sequences are smaller.
+Thus, we need to use `GeneMark-ES` to predict genes that we then can use to BLAST against a protein database. In our case we will be using the high-quality and well annotated protein database: `Swissprot`.
+
+### Gene prediction using `GeneMark`
+
+```
+mkdir 03_GENE-PRED
+
+# Gene prediction
+ gmes_petap.pl --ES --min_contig 3000 --cores 24 --work_dir 03_GENE-PRED/ --sequence 02_DE-HOST/contigs-deHOST.fasta
+``` 
+
+### DIAMOND
+`DIAMOND` is an accelerated version of BLASTX, capable of performing the same alignments 20000 times faster.
