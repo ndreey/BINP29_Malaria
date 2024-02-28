@@ -244,13 +244,90 @@ Our hard filtering removed what we expect to be biologically irrelevent (small c
 Thus, we need to use `GeneMark-ES` to predict genes that we then can use to BLAST against a protein database. In our case we will be using the high-quality and well annotated protein database: `Swissprot`.
 
 ### Gene prediction using `GeneMark`
-
+We found 11228 CDS and 3683 genes !
 ```
 mkdir 03_GENE-PRED
 
 # Gene prediction
- gmes_petap.pl --ES --min_contig 3000 --cores 24 --work_dir 03_GENE-PRED/ --sequence 02_DE-HOST/contigs-deHOST.fasta
+gmes_petap.pl --ES --min_contig 3000 --cores 24 --work_dir 03_GENE-PRED/ --sequence 02_DE-HOST/contigs-deHOST.fasta
+
+# Lets check what GeneMark found.
+cat 03_GENE-PRED/genemark.gtf | cut -f3 | sort | uniq -c
+
+  11228 CDS
+   3683 gene
+   7545 intron
+   3683 mRNA
+   2098 start_codon
+   2645 stop_codon
 ``` 
 
+#### Generate FASTA file from .gtf
+Here we will use the `gffParse.pl` script to generate FASTA files from the .gft file from the last step. The script can be found in `scripts/`.
+
+```
+# Generate .fna and .faa files for gene features
+gffParse.pl -i 02_DE-HOST/contigs-deHOST.fasta -g 03_GENE-PRED/genemark.gtf -b Ht_gene -d 04_GENE/ -p -f gene
+```
+
 ### DIAMOND
-`DIAMOND` is an accelerated version of BLASTX, capable of performing the same alignments 20000 times faster.
+`DIAMOND` is an accelerated version of BLASTX, capable of performing the same alignments 20000 times faster. 
+
+#### Get the NCBI taxonomy.
+As i want to work with the taxonomy i will download the NCBI taxdump and
+taxonomy map (protein accesion -> taxid).
+
+```
+# Download taxdump
+wget -c ftp://ftp.ncbi.nih.gov/pub/taxonomy/taxdump.tar.gz 
+
+# Unpack it to specific directory in DB/taxdump
+mkdir DB/NCBI_TAXDUMP
+tar -zxvf taxdump.tar.gz -C DB/NCBI_TAXDUMP
+
+# Remove the .tar.gz
+rm taxdump.tar.gz
+
+# Download the taxonmap
+wget ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/accession2taxid/prot.accession2taxid.gz
+
+# Unzip to NCBI_TAXDUMP
+gunzip -c prot.accession2taxid.gz > DB/NCBI_TAXDUMP/prot.accession2taxid
+
+```
+
+#### Creating the `DIAMOND` database.
+
+```
+# Creating the database
+diamond makedb --threads 24 \ 
+    --in DB/SwissProt.fasta \ 
+    --db DB/diamond_swissprot \ 
+    --taxonmap DB/NCBI_TAXDUMP/prot.accession2taxid \ 
+    --taxonnodes DB/NCBI_TAXDUMP/nodes.dmp \ 
+    --taxonnames DB/NCBI_TAXDUMP/names.dmp
+
+```
+#### Running DIAMON
+Lets start with running blastp as we got the .faa files from the `gffParser.pl`.
+It will be quicker.
+
+- `--sensitive`: Enable the sensitive mode designed for full sensitivity for hits >40% identity.
+
+- `--evalue`: E-value threshold.
+
+- `seqid`: means Query Seq - id
+
+- `sphylums sscinames staxids`: Phylum, scientific name and taxid.
+
+- `sseqid qlen evalue bitscore pident`: Subject seq id, length of query, then statistics.
+
+```
+# Using tabular output format.
+diamond blastp \
+    --threads 36 --sensitive --evalue 0.001 \
+    --db DB/diamond_swissprot.dmnd \
+    --query 04_Ht-GENE/Ht_gene.faa \ 
+    --outfmt 6 qseqid sphylums sscinames staxids sseqid qlen evalue bitscore pident \
+    --out 05_DIAMOND/2Ht_6frmt.out
+```
