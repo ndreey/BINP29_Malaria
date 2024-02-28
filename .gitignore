@@ -1,1 +1,4 @@
-00_GENEMARK/*
+00_RAW/*
+01_GENEMARK/*
+02_DE-HOST/*.fasta
+DB/*
