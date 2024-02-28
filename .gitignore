@@ -2,4 +2,7 @@
 01_GENEMARK/*
 02_DE-HOST/*.fasta
 03_GENE-PRED/*
+04_Ht-GENE/
+prot.accession2taxid.gz
+05_DIAMOND/
 DB/*
