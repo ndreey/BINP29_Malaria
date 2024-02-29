@@ -482,10 +482,14 @@ Length          Scaffolds       Contigs         Length          Length          
   50 KB                      1               1          64,494          64,494   100.00%
 ```
 ### BUSCO check
-To get an idea of how complete the assembly is we will run `BUSCO`.
+To get an idea of how complete the assembly is we will run `BUSCO` using the [apicomplexa_odb10](https://busco.ezlab.org/list_of_lineages.html) database.
+
 Our host decontamination seems to have worked well as we only have one duplicated single copy gene. However, we are missing quite the chunk.
 
 ```
+mkdir 08_BUSCO/
+
+# Run BUSCO
 busco -i 07_CLEAN/clean_Ht.fasta -m genome -c 64 --out_path 08_BUSCO/ -l apicomplexa_odb10
 
 2024-02-29 15:07:50 INFO:
@@ -517,4 +521,53 @@ mkdir 09_CLEAN-GENES/
 gmes_petap.pl --ES --min_contig 3000 --cores 64 --work_dir 09_CLEAN-GENES/ --sequence 07_CLEAN/clean_Ht.fasta
 ```
 
+## Phylogenetic tree analysis
+To compare the phylogeny we need to determine genes that are present in all taxa and that are somewhat conserved. In essence, we need orthologous genes.
+
+### FASTA files with genes from each genome
+We need to generate `.faa` files for each genome with their corresponding genes. However, as `Tg.gff.gz` doesnt have any `gene` annotations we will use the default `CDS`. Furtheremore, the soft link for `Tg.gff.gz` will be removed and the file will be copied to `01_GENEMARK` and `gunzipped`.
+This means that the `00_RAW/` files also have to be `gunzipped`.
+
+Finally, `Plasmodium_knowlesi.genome` has duplicated headers. We will start by fixing it.
+
+```
+# Remove the lines that start with chromosome
+cat 00_RAW/Plasmodium_knowlesi.genome | grep -v "^chromosome" > 00_RAW/tmp.Plasmodium_knowlesi.genome
+
+# Remove and change name of the tmp file.
+rm 00_RAW/Plasmodium_knowlesi.genome
+mv 00_RAW/tmp.Plasmodium_knowlesi.genome 00_RAW/Plasmodium_knowlesi.genome
+```
+
+_samples.csv_
+```
+Ht,07_CLEAN/clean_Ht.fasta,09_CLEAN-GENES/genemark.gtf
+Pb,00_RAW/Plasmodium_berghei.genome,01_GENEMARK/genemark.Pb.gtf
+Pc,00_RAW/Plasmodium_cynomolgi.genome,01_GENEMARK/genemark.Pc.gtf
+Pf,00_RAW/Plasmodium_faciparum.genome,01_GENEMARK/genemark.Pf.gtf
+Pk,00_RAW/Plasmodium_knowlesi.genome,01_GENEMARK/genemark.Pk.gtf
+Pv,00_RAW/Plasmodium_vivax.genome,01_GENEMARK/genemark.Pv.gtf
+Py,00_RAW/Plasmodium_yoelii.genome,01_GENEMARK/genemark.Py.gtf
+Tg,00_RAW/Toxoplasma_gondii.genome,01_GENEMARK/Tg.gff
+```
+
+_gene_fasta_parser.sh_
+```
+#!/bin/bash
+
+# Make directory for FASTA-GENES, if it doesn't already exist
+mkdir -p 10_FASTA-GENES
+
+# Change to the 10_FASTA-GENES directory
+cd 10_FASTA-GENES
+
+# Loop through samples.csv and run gffParse.pl for each line
+while IFS=, read -r taxa genome gff; do
+  # Run parser for each genome
+  gffParse.pl -i ../"$genome" -g ../"$gff" -b ../"$taxa" -d "$taxa" -p -f CDS
+done < ../samples.csv
+
+# Change back to the original directory
+cd ..
+```
 

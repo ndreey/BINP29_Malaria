@@ -9,4 +9,5 @@ prot.accession2taxid.gz
 08_BUSCO/
 09_CLEAN-GENES/
 busco_downloads/
+10_FASTA-GENES/
 DB/*
