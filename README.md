@@ -552,7 +552,7 @@ Tg,00_RAW/Toxoplasma_gondii.genome,01_GENEMARK/Tg.gff
 ```
 
 _gene_fasta_parser.sh_
-```
+```{bash}
 #!/bin/bash
 
 # Make directory for FASTA-GENES, if it doesn't already exist
@@ -564,7 +564,7 @@ cd 10_FASTA-GENES
 # Loop through samples.csv and run gffParse.pl for each line
 while IFS=, read -r taxa genome gff; do
   # Run parser for each genome
-  gffParse.pl -i ../"$genome" -g ../"$gff" -b ../"$taxa" -d "$taxa" -p -f CDS
+  gffParse.pl -c -i ../"$genome" -g ../"$gff" -b ../"$taxa" -d "$taxa" -p -f CDS
 done < ../samples.csv
 
 # Change back to the original directory
