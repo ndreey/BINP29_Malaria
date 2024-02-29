@@ -1,0 +1,4 @@
+SYSTEMCALL of Thu Feb 29 23:11:44 2024:
+proteinortho -project=Ht_phylo ../10_FASTA-GENES/Ht-clean.faa ../10_FASTA-GENES/Pb-clean.faa ../10_FASTA-GENES/Pc-clean.faa ../10_FASTA-GENES/Pf-clean.faa ../10_FASTA-GENES/Pk-clean.faa ../10_FASTA-GENES/Pv-clean.faa ../10_FASTA-GENES/Py-clean.faa ../10_FASTA-GENES/Tg-clean.faa
+
+Parameter-vector : (version=6.3.1,step=0,verbose=1,debug=0,synteny=0,duplication=2,cs=3,alpha=0.5,connectivity=0.1,cpus=0,evalue=1e-05,purity=-1,coverage=50,identity=25,blastmode=diamond,sim=0.95,report=3,keep=0,force=0,selfblast=0,twilight=0,core=0,coreMinSpecies=0,coreMaxProts=10,pseudo=1,omni=0,identical=0,range=-1,singles=0,clean=0,blastOptions=,makeBlastOptions=,nograph=0,xml=0,desc=0,tmp_path=./proteinortho_cache_Ht_phylo/,blastversion=unknown,binpath=,makedb=,blast=,jobs_todo=0,project=Ht_phylo,inproject=Ht_phylo,po_path=/home/inf-49-2023/miniconda3/envs/proteinortho/bin/,run_id=,threads_per_process=1,um=0)--------

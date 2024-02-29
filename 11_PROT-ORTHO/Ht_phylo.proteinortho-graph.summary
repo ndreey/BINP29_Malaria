@@ -1,0 +1,67 @@
+# Ht_phylo.proteinortho.tsv statistics:
+# number of groups that contains at least p% species:
+# p	species	groups	genes in groups
+0%	0	5467 (100%)	29753 (100%)	
+20%	1	5467 (100%)	29753 (100%)	
+30%	2	5467 (100%)	29753 (100%)	
+40%	3	4609 (84.3%)	27905 (93.78%)	
+50%	4	4137 (75.67%)	26470 (88.96%)	
+70%	5	3834 (70.12%)	25235 (84.81%)	
+80%	6	3128 (57.21%)	21652 (72.77%)	
+90%	7	1595 (29.17%)	12292 (41.31%)	
+100%	8	355 (6.49%)	3234 (10.86%)	
+# NOTE: p=100% correspond to the core proteome and p=0% to all groups
+# number of groups for each input species:
+Pv-clean.faa	4756	86.99%
+Pc-clean.faa	4722	86.37%
+Pk-clean.faa	4457	81.52%
+Py-clean.faa	4291	78.48%
+Pf-clean.faa	4068	74.41%
+Pb-clean.faa	3448	63.06%
+Ht-clean.faa	2001	36.6%
+Tg-clean.faa	849	15.52%
+
+# ----------------------------------
+# graph file statistics:
+
+# The adjacency matrix, the number of edges between 2 species
+# file	Ht-clean.faa	Pb-clean.faa	Pc-clean.faa	Pf-clean.faa	Pk-clean.faa	Pv-clean.faa	Py-clean.faa	Tg-clean.faa	
+Ht-clean.faa	0	1338	1622	1713	1659	1673	1698	709
+Pb-clean.faa	1338	0	2579	2615	2597	2637	3226	1095
+Pc-clean.faa	1622	2579	0	3547	4227	4614	3523	1279
+Pf-clean.faa	1713	2615	3547	0	3715	3748	3678	1326
+Pk-clean.faa	1659	2597	4227	3715	0	4344	3612	1356
+Pv-clean.faa	1673	2637	4614	3748	4344	0	3675	1410
+Py-clean.faa	1698	3226	3523	3678	3612	3675	0	1318
+Tg-clean.faa	709	1095	1279	1326	1356	1410	1318	0
+
+# file	average number of edges
+Ht-clean.faa	1301.5	
+Pb-clean.faa	2010.875	
+Pc-clean.faa	2673.875	
+Pf-clean.faa	2542.75	
+Pk-clean.faa	2688.75	
+Pv-clean.faa	2762.625	
+Py-clean.faa	2591.25	
+Tg-clean.faa	1061.625	
+
+# The 2-path matrix, the number of paths between 2 species of length 2
+# file	Ht-clean.faa	Pb-clean.faa	Pc-clean.faa	Pf-clean.faa	Pk-clean.faa	Pv-clean.faa	Py-clean.faa	Tg-clean.faa	
+Ht-clean.faa(0)	16292592	23636860	31147393	28871071	31056867	31879074	29406153	12657584
+Pb-clean.faa(1)	47273720	40583989	47355981	44288236	47428160	48619868	41490260	19206243
+Pc-clean.faa(2)	62294786	94711962	75067229	57172696	57068282	55921088	58029972	25558191
+Pf-clean.faa(3)	57742142	88576472	114345392	65488492	55990495	57651732	52780893	23784379
+Pk-clean.faa(4)	62113734	94856320	114136564	111980990	74921060	58237054	57501803	25238025
+Pv-clean.faa(5)	63758148	97239736	111842176	115303464	116474108	79453259	58936890	25678940
+Py-clean.faa(6)	58812306	82980520	116059944	105561786	115003606	117873780	67518786	24198919
+Tg-clean.faa(7)	25315168	38412486	51116382	47568758	50476050	51357880	48397838	10659783
+
+# file	average number of 2-paths
+Ht-clean.faa(0)	49200324.5
+Pb-clean.faa(1)	73079400.625
+Pc-clean.faa(2)	92446804.375
+Pf-clean.faa(3)	88320937
+Pk-clean.faa(4)	92495304
+Pv-clean.faa(5)	94162818.875
+Py-clean.faa(6)	89026070.75
+Tg-clean.faa(7)	40413043.125

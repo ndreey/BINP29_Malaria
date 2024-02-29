@@ -570,4 +570,42 @@ done < ../samples.csv
 # Change back to the original directory
 cd ..
 ```
+### Renaming headers and removing stopcodons (*)
+The headers have a bit of information that is not needed. The sequences also have stop codons indicated with an asterix (*).
 
+Lets fix that
+
+*clean_header.sh*
+```
+#!/bin/bash
+
+# Set directory
+dir="10_FASTA-GENES"
+
+for taxa in Ht Pb Pc Pf Pk Pv Py Tg; do
+  fix="_$taxa"
+
+  # Rename to raw.
+  mv ${dir}/${taxa}.faa ${dir}/raw-${taxa}.faa
+
+  # Fix header to keep gene number and taxa, and remove asterisks.
+  awk -v fix="$fix" '/^>/ {print $1 fix; next} {print}' ${dir}/raw-${taxa}.faa | \
+    sed 's/\*//g' > ${dir}/${taxa}-clean.faa
+
+done
+```
+
+### ProteinOrtho
+We will use `Proteinortho` to find orthologous genes!
+
+```
+# Generate directory and move to it as output cant be specified.
+mkdir 11_PROT-ORTHO
+cd 11_PROT-ORTHO
+
+# Call proteinortho to find orthologs using brace expansion.
+proteinortho6.pl -project=Ht_phylo ../10_FASTA-GENES/{Ht,Pb,Pc,Pf,Pk,Pv,Py,Tg}-clean.faa
+
+# Move back
+cd ..
+```
