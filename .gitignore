@@ -10,4 +10,12 @@ prot.accession2taxid.gz
 09_CLEAN-GENES/
 busco_downloads/
 10_FASTA-GENES/
+12_BUSCO-ORTHO/BUSCO_Ht-clean.faa/
+12_BUSCO-ORTHO/BUSCO_Pb-clean.faa/
+12_BUSCO-ORTHO/BUSCO_Pc-clean.faa/
+12_BUSCO-ORTHO/BUSCO_Pf-clean.faa/
+12_BUSCO-ORTHO/BUSCO_Pk-clean.faa/
+12_BUSCO-ORTHO/BUSCO_Pv-clean.faa/
+12_BUSCO-ORTHO/BUSCO_Py-clean.faa/
+12_BUSCO-ORTHO/BUSCO_Tg-clean.faa/
 DB/*

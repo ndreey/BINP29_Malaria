@@ -609,3 +609,92 @@ proteinortho6.pl -project=Ht_phylo ../10_FASTA-GENES/{Ht,Pb,Pc,Pf,Pk,Pv,Py,Tg}-c
 # Move back
 cd ..
 ```
+
+### BUSCO
+How many of the predicted genes are BUSCO orthologs.
+```
+#!/bin/bash
+
+# Set directory
+dir="10_FASTA-GENES"
+
+# Create directory if it doesnt exist
+mkdir -p 12_BUSCO-ORTHO
+
+for taxa in Ht Pb Pc Pf Pk Pv Py Tg; do
+
+  busco -i $dir/$taxa-clean.faa -m prot -c 64 \
+          --out_path 12_BUSCO-ORTHO -l apicomplexa_odb10
+
+done
+```
+We see that our genes that were predicted are not as complete as the other taxa. It is interesting that the completeness has reduced 10% compared to when we ran BUSCO on the whole Ht genome. The gene predictor seems to have missed 40 genes. 
+
+As noted in the previous BUSCO run, our genome is missing 40% of the BUSCOs, which indicates that our assembly is not optimal. Perhaps the sequence depth was not enough or data was lost prior the assembly (as we do not have the raw reads).
+| Taxa | Numb. Complete BUSCOs | Percentage Completeness |
+|----  |----------|-------------|
+| Pb   | 361      |  81.0       |
+| Pc   | 429      |  96.2       |
+| Pf   | 436      |  97.8       |
+| Pk   | 433      |  97.1       |
+| Pv   | 437      |  97.9       |
+| Py   | 435      |  97.5       |
+| Ht   | 228      |  51.1       |
+| Tg   | 381      |  85.5       |
+
+#### Which BUSCOs do they share?
+The BUSCO id's for each `$taxa` can be found here:
+
+    12_BUSCO-ORTHO/BUSCO_$taxa-clean.faa/run_apicomplexa_odb10/full_table.tsv
+
+So lets parse and see which they share!
+
+*get_busco_id.sh*
+```
+#!/bin/bash
+
+tsv="run_apicomplexa_odb10/full_table.tsv"
+for taxa in Ht Pb Pc Pf Pk Pv Py Tg; do
+
+cat 12_BUSCO-ORTHO/BUSCO_$taxa-clean.faa/$tsv | grep -w "Complete" | \
+ cut -f 1 >> 12_BUSCO-ORTHO/all_BUSCO-ID.txt
+
+done
+```
+Apparently, they share **0** orthologous genes across all species. However, there seems that 190 BUSCO genes are shared across 7 of the species.
+
+```
+cat 12_BUSCO-ORTHO/all_BUSCO-ID.txt | sort | uniq -c | grep -c -w "8" 
+0
+
+cat 12_BUSCO-ORTHO/all_BUSCO-ID.txt | sort | uniq -c | grep -c -w "7" 
+190
+```
+Lets edit the script to remove _Toxoplasma gondii_.
+
+*no_Tg_BUSCO_ids.sh*
+```
+#!/bin/bash
+
+tsv="run_apicomplexa_odb10/full_table.tsv"
+for taxa in Ht Pb Pc Pf Pk Pv Py; do
+
+cat 12_BUSCO-ORTHO/BUSCO_$taxa-clean.faa/$tsv | grep -w "Complete" | \
+ cut -f 1 >> 12_BUSCO-ORTHO/no-Tg_BUSCO-ID.txt
+
+done
+
+numb=$(cat 12_BUSCO-ORTHO/all_BUSCO-ID.txt | sort | uniq -c | grep -c -w "7")
+
+echo "  Number of orthologous genes shared: $numb"
+```
+
+```
+bash scripts/no_Tg_BUSCO_ids.sh
+  Number of orthologous genes shared: 190
+```
+
+Eureeeka! It seems that the outgroup **Tg** is to far off. Which, is a bit peculiar as all our species comes from the same Phylum (Apicomplexa). However, _Plasmodium spp._ and _Haemoproteus spp._ belong in the class **Aconoidasida** whereas **Tg** belongs to **Conoidasida**. 
+
+As mentioned in the beginning of this `README`, endophytes have strong selective pressure due to thier life cycle. The rate of evolutionary change and divergence is concordingly much faster which results with them being so divergent. Noteworthy, if we had relaxed the thresholds of BUSCO we could probably have achieved orthologous genes between them all. 
+
