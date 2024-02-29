@@ -9,6 +9,7 @@ bbmap                   39.06           bioconda
 seqkit                  2.7.0           bioconda
 GeneMark-ES             4.71            N/A
 diamond                 2.1.9           bioconda
+taxonkit                0.15.1          bioconda
 ```
 
 ## Setting the scene
@@ -355,6 +356,125 @@ diamond blastx \
     --out 05_DIAMOND/bx-Ht.out
 ```
 
+### Taxonomy parsing
+We will be using `TaxonKit` instead of parsing.
 
+#### Determining which `taxids` belong to the order Aves
+First, lets generate a file with all the unique taxids from our diamond output.
+
+```
+# Generate a file with taxids
+cat 05_DIAMOND/bx-Ht.out | cut -f4 | sort | uniq > 05_DIAMOND/bx-Ht.tax
+cat 05_DIAMOND/bp-Ht.out | cut -f4 | sort | uniq > 05_DIAMOND/bp-Ht.tax
+```
+
+Now lets see which taxids belong to the order Aves.
+```
+# Set variable for TaxonKit
+TAXONKIT_DB="DB/NCBI_TAXDUMP/"
+
+# BLASTp hits
+taxonkit lineage -n --data-dir $TAXONKIT_DB -n 05_DIAMOND/bp-Ht.tax | grep "Aves" | cut -f 1,3
+
+# BLASTx hits
+taxonkit lineage -n --data-dir $TAXONKIT_DB -n 05_DIAMOND/bx-Ht.tax | grep "Aves" | cut -f 1,3
+```
+
+The same taxids are found. 
+```
+59729   Taeniopygia guttata
+8932    Columba livia
+9031    Gallus gallus
+9091    Coturnix coturnix
+93934   Coturnix japonica
+```
+
+#### To remove or not to remove contigs
+Lets determine which contigs had the bird genes and determine if the alignments are significant enough.
+
+```
+# Save the taxids to a .txt
+taxonkit lineage -n --data-dir $TAXONKIT_DB -n 05_DIAMOND/bx-Ht.tax | grep "Aves" | cut -f 1 > 05_DIAMOND/taxid_aves.txt
+```
+
+Now lets parse to get the contigs and alignment scores.
+```
+mkdir 06_AVES-OUT
+
+# BLASTp hits
+cat 05_DIAMOND/bp-Ht.out | grep -w -f 05_DIAMOND/taxid_aves.txt | cut -f 1,3,4,5,6,7,8,9 > 06_AVES-OUT/tmp.bp-Ht-aves.out
+
+# BLASTx hits
+cat 05_DIAMOND/bx-Ht.out | grep -w -f 05_DIAMOND/taxid_aves.txt | cut -f 1,3,4,5,6,7,8,9 > 06_AVES-OUT/tmp.bx-Ht-aves.out
+```
+Then lets fix the id to only keep the contig name
+```
+# BLASTp hits
+awk -F'\t' 'BEGIN {OFS="\t"} {split($1,a,"="); $1=a[3]; print}' 06_AVES-OUT/tmp.bp-Ht-aves.out | sed 's/\\tstrand//' > bp-Ht-aves.out
+
+# BLASTx hits
+awk -F'\t' 'BEGIN {OFS="\t"} {split($1,a,"="); $1=a[3]; print}' 06_AVES-OUT/tmp.bp-Ht-aves.out | sed 's/\\tstrand//' > bx-Ht-aves.out
+
+# Remove the tmp files.
+rm 06_AVES-OUT/tmp.*
+```
+Inspecting the `aves.out` files we see that the evalues are very significant. 
+Also, we get the same contigs for both blastp and blastx.
+
+```
+# BLASTp
+cat 06_AVES-OUT/bp-Ht-aves.out | cut -f1 | sort | uniq | wc -l
+125
+# BLASTx
+cat 06_AVES-OUT/bx-Ht-aves.out | cut -f1 | sort | uniq | wc -l
+125
+
+# Concatenated
+cat 06_AVES-OUT/bx-Ht-aves.out | cut -f1 > 06_AVES-OUT/aves-contigs.txt
+cat 06_AVES-OUT/bp-Ht-aves.out | cut -f1 >> 06_AVES-OUT/aves-contigs.txt
+cat 06_AVES-OUT/aves-contigs.txt | sort | uniq | wc -l
+125
+
+```
+Therefore, i will remove all the 125 contigs.
+
+### Removing Host contamination
+
+```
+mkdir 07_CLEAN
+
+# Getting all contigs except those in aves-contigs.txt
+seqkit grep -v -f 06_AVES-OUT/aves-contigs.txt 02_DE-HOST/contigs-deHOST.fasta > 07_CLEAN/clean_Ht.fasta
+```
+Using `stats.sh` again from `bbmap` we get these results of our final clean assembly.
+```
+A       C       G       T       N       IUPAC   Other   GC      GC_stdev
+0.3566  0.1320  0.1244  0.3871  0.0000  0.0000  0.0000  0.2564  0.0221
+
+Main genome scaffold total:             2097
+Main genome contig total:               2097
+Main genome scaffold sequence total:    15.351 MB
+Main genome contig sequence total:      15.351 MB       0.000% gap
+Main genome scaffold N/L50:             583/8.297 KB
+Main genome contig N/L50:               583/8.297 KB
+Main genome scaffold N/L90:             1652/3.904 KB
+Main genome contig N/L90:               1652/3.904 KB
+Max scaffold length:                    64.494 KB
+Max contig length:                      64.494 KB
+Number of scaffolds > 50 KB:            1
+% main genome in scaffolds > 50 KB:     0.42%
+
+
+Minimum         Number          Number          Total           Total           Scaffold
+Scaffold        of              of              Scaffold        Contig          Contig  
+Length          Scaffolds       Contigs         Length          Length          Coverage
+--------        --------------  --------------  --------------  --------------  --------
+    All                  2,097           2,097      15,351,229      15,351,214   100.00%
+ 2.5 KB                  2,097           2,097      15,351,229      15,351,214   100.00%
+   5 KB                  1,273           1,273      12,131,676      12,131,663   100.00%
+  10 KB                    394             394       5,962,061       5,962,057   100.00%
+  25 KB                     25              25         785,970         785,970   100.00%
+  50 KB                      1               1          64,494          64,494   100.00%
+```
 
 
