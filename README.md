@@ -9,7 +9,6 @@ bbmap                   39.06           bioconda
 seqkit                  2.7.0           bioconda
 GeneMark-ES             4.71            N/A
 diamond                 2.1.9           bioconda
-diamond_add_taxonomy    0.1.2           bioconda
 ```
 
 ## Setting the scene
@@ -45,7 +44,6 @@ ln -s /resources/binp29/Data/malaria/Haemoproteus_tartakovskyi.raw.genome.gz 00_
 ```
 mkdir DB
 ln -s /resources/binp29/Data/malaria/SwissProt.fasta DB
-ln -s /resources/binp29/Data/malaria/taxonomy.dat DB
 ln -s /resources/binp29/Data/malaria/uniprot_sprot.dat DB
 ```
 ### Existing gene predictions
@@ -309,25 +307,54 @@ diamond makedb --threads 24 \
 
 ```
 #### Running DIAMON
-Lets start with running blastp as we got the .faa files from the `gffParser.pl`.
-It will be quicker.
+Lets run both **blastp** and **blastx** as we got both `.fna` and `.faa` files from the `gffParser.pl`.
 
+Using the `time` command we saw that `DIAMOND` took: 
+- **BLASTP** : `real    0m14.988s`. 
+
+- **BLASTX**: `real    0m17.327s`
+
+Furthermore, we got **19110** alignments with blastp and **30085** with blastx.
+
+This is how we structured the tabulated .out file.
+
+1. **qseqid**: Query ID.
+
+2. **sphylums sscinames staxids**: Phylum, Scientific name, NCBI taxid.
+
+3. **sseqid**: The sequence it matched to in Swissprot DB.
+
+4. **qlen evalue bitscore pident**: Query length, then BLAST satistics.
+
+The meaning of the flags
 - `--sensitive`: Enable the sensitive mode designed for full sensitivity for hits >40% identity.
 
 - `--evalue`: E-value threshold.
 
-- `seqid`: means Query Seq - id
+- `--outfmt 6`: Specifies we want it in tabular format with the column structure mentioned above.
 
-- `sphylums sscinames staxids`: Phylum, scientific name and taxid.
-
-- `sseqid qlen evalue bitscore pident`: Subject seq id, length of query, then statistics.
+-`--max-target-seqs 10`: Only reports the top 10 based on evalue.
 
 ```
-# Using tabular output format.
+# BLASTp
 diamond blastp \
     --threads 36 --sensitive --evalue 0.001 \
     --db DB/diamond_swissprot.dmnd \
     --query 04_Ht-GENE/Ht_gene.faa \ 
     --outfmt 6 qseqid sphylums sscinames staxids sseqid qlen evalue bitscore pident \
-    --out 05_DIAMOND/2Ht_6frmt.out
+    --max-target-seqs 10 \
+    --out 05_DIAMOND/bp-Ht.out
+
+# BLASTx
+diamond blastx \
+    --threads 36 --sensitive --evalue 0.001 \
+    --db DB/diamond_swissprot.dmnd \
+    --query 04_Ht-GENE/Ht_gene.fna \ 
+    --outfmt 6 qseqid sphylums sscinames staxids sseqid qlen evalue bitscore pident \
+    --max-target-seqs 10 \
+    --out 05_DIAMOND/bx-Ht.out
 ```
+
+
+
+
