@@ -20,15 +20,19 @@ meta sample info
 
 | Abbr.  | Species                | Host     | Genome Size | Genes | Genomic GC |
 |----|----------------------------|----------|-------------|-------|------------|
-| Pb | Plasmodium berghei         | rodents  |             |       |            |
-| Pc | Plasmodium cynomolgi       | macaques |             |       |            |
-| Pf | Plasmodium falciparum      | humans   |             |       |            |
-| Pk | Plasmodium knowlesi        | lemurs   |             |       |            |
-| Pv | Plasmodium vivax           | humans   |             |       |            |
-| Py | Plasmodium yoelii          | rodents  |             |       |            |
-| Ht | Haemoproteus tartakovskyi  | birds    |             |       |            |
-| Tg | Toxoplasma gondii          | humans   |             |       |            |
+| Pb | Plasmodium berghei         | rodents  |  17.955 MB  |  7235 |  0.2372    |
+| Pc | Plasmodium cynomolgi       | macaques |  26.181 MB  |  5787 |  0.4038    |
+| Pf | Plasmodium falciparum      | humans   |  23.270 MB  |  5207 |  0.1936    |
+| Pk | Plasmodium knowlesi        | lemurs   |  23.462 MB  |  4952 |  0.3883    |
+| Pv | Plasmodium vivax           | humans   |  27.008 MB  |  5682 |  0.4228    |
+| Py | Plasmodium yoelii          | rodents  |  22.222 MB  |  4889 |  0.2177    |
+| Ht | Haemoproteus tartakovskyi  | birds    |  15.351 MB  |  3343 |  0.2564    |
+| Tg | Toxoplasma gondii          | humans   |  128.106 MB | 15892 |  0.5235    |
 
+### What may cause the biased GC-content in some species?
+The variation in GC-content among the parasites can be attributed to a combination of evolutionary pressures, host specificity, and the ecological niches these parasites inhabit. It is well documented that obligate symbionts often exhibit reduced genomes and a high AT-content due to their specialized life cycles within host organisms. This specialization can lead to the loss of certain genes, such as those encoding envelope structures, which are not necessary within the protected environment of a host (as seen in endophytic bacteria living within bactericytes). However, this is regarding endophytic bacteria. 
+
+_P. falciparum_ and _P. vivax_ both infect humans but show a big difference in GC-content. This discrepency underscores the concept that, despite infecting the same host species, these parasites have undergone distinct evolutionary trajectories. Likely influenced by immune responses, transmission vectors, and environmental conditions, leading to their current genomic compositions. 
 
 ### Do you think that in a phylogenetic tree the parasites that use similar hosts will group together?
 Typically, yes, but it's not always straightforward. Especially when considering humans as hosts, it's unlikely they'll cluster neatly. Humans originated in Africa and have since spread globally. Given the potential for host-switching and the diversity of species radiations, it's not a given that Apicomplexa species would necessarily cluster based on their use of similar hosts.
@@ -477,4 +481,11 @@ Length          Scaffolds       Contigs         Length          Length          
   50 KB                      1               1          64,494          64,494   100.00%
 ```
 
+## Gene prediction on clean Ht assembly
+Time to make new gene predictions but using the decontaminated assembly.
+```
+mkdir 08_CLEAN-GENES/
 
+# Gene pred
+gmes_petap.pl --ES --min_contig 3000 --cores 64 --work_dir 08_CLEAN-GENES/ --sequence 07_CLEAN/clean_Ht.fasta
+```

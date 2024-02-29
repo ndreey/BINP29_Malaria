@@ -6,4 +6,5 @@
 prot.accession2taxid.gz
 05_DIAMOND/
 07_CLEAN/
+08_CLEAN-GENES/
 DB/*
