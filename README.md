@@ -10,6 +10,7 @@ seqkit                  2.7.0           bioconda
 GeneMark-ES             4.71            N/A
 diamond                 2.1.9           bioconda
 taxonkit                0.15.1          bioconda
+busco                   5.6.1           bioconda
 ```
 
 ## Setting the scene
@@ -480,12 +481,40 @@ Length          Scaffolds       Contigs         Length          Length          
   25 KB                     25              25         785,970         785,970   100.00%
   50 KB                      1               1          64,494          64,494   100.00%
 ```
+### BUSCO check
+To get an idea of how complete the assembly is we will run `BUSCO`.
+Our host decontamination seems to have worked well as we only have one duplicated single copy gene. However, we are missing quite the chunk.
+
+```
+busco -i 07_CLEAN/clean_Ht.fasta -m genome -c 64 --out_path 08_BUSCO/ -l apicomplexa_odb10
+
+2024-02-29 15:07:50 INFO:
+
+    ---------------------------------------------------
+    |Results from dataset apicomplexa_odb10            |
+    ---------------------------------------------------
+    |C:60.1%[S:59.9%,D:0.2%],F:2.7%,M:37.2%,n:446      |
+    |268    Complete BUSCOs (C)                        |
+    |267    Complete and single-copy BUSCOs (S)        |
+    |1    Complete and duplicated BUSCOs (D)           |
+    |12    Fragmented BUSCOs (F)                       |
+    |166    Missing BUSCOs (M)                         |
+    |446    Total BUSCO groups searched                |
+    ---------------------------------------------------
+
+# Generating plots
+generate_plot.py -wd 05_BUSCO/BUSCO_assembly.fasta/
+```
+![BUSCO Ht](figures/busco_figure.png)
 
 ## Gene prediction on clean Ht assembly
 Time to make new gene predictions but using the decontaminated assembly.
+
 ```
-mkdir 08_CLEAN-GENES/
+mkdir 09_CLEAN-GENES/
 
 # Gene pred
-gmes_petap.pl --ES --min_contig 3000 --cores 64 --work_dir 08_CLEAN-GENES/ --sequence 07_CLEAN/clean_Ht.fasta
+gmes_petap.pl --ES --min_contig 3000 --cores 64 --work_dir 09_CLEAN-GENES/ --sequence 07_CLEAN/clean_Ht.fasta
 ```
+
+

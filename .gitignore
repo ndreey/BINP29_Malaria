@@ -6,5 +6,7 @@
 prot.accession2taxid.gz
 05_DIAMOND/
 07_CLEAN/
-08_CLEAN-GENES/
+08_BUSCO/
+09_CLEAN-GENES/
+busco_downloads/
 DB/*
