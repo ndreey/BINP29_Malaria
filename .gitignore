@@ -5,4 +5,5 @@
 04_Ht-GENE/
 prot.accession2taxid.gz
 05_DIAMOND/
+07_CLEAN/
 DB/*
