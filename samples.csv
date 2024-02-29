@@ -1,0 +1,8 @@
+Ht,07_CLEAN/clean_Ht.fasta,09_CLEAN-GENES/genemark.gtf
+Pb,00_RAW/Plasmodium_berghei.genome,01_GENEMARK/genemark.Pb.gtf
+Pc,00_RAW/Plasmodium_cynomolgi.genome,01_GENEMARK/genemark.Pc.gtf
+Pf,00_RAW/Plasmodium_faciparum.genome,01_GENEMARK/genemark.Pf.gtf
+Pk,00_RAW/Plasmodium_knowlesi.genome,01_GENEMARK/genemark.Pk.gtf
+Pv,00_RAW/Plasmodium_vivax.genome,01_GENEMARK/genemark.Pv.gtf
+Py,00_RAW/Plasmodium_yoelii.genome,01_GENEMARK/genemark.Py.gtf
+Tg,00_RAW/Toxoplasma_gondii.genome,01_GENEMARK/Tg.gff
