@@ -684,17 +684,99 @@ cat 12_BUSCO-ORTHO/BUSCO_$taxa-clean.faa/$tsv | grep -w "Complete" | \
 
 done
 
-numb=$(cat 12_BUSCO-ORTHO/all_BUSCO-ID.txt | sort | uniq -c | grep -c -w "7")
+numb=$(cat 12_BUSCO-ORTHO/no-Tg_BUSCO-ID.txt | sort | uniq -c | grep -c -w "7")
 
 echo "  Number of orthologous genes shared: $numb"
 ```
 
 ```
 bash scripts/no_Tg_BUSCO_ids.sh
-  Number of orthologous genes shared: 190
+  Number of orthologous genes shared: 188
 ```
 
 Eureeeka! It seems that the outgroup **Tg** is to far off. Which, is a bit peculiar as all our species comes from the same Phylum (Apicomplexa). However, _Plasmodium spp._ and _Haemoproteus spp._ belong in the class **Aconoidasida** whereas **Tg** belongs to **Conoidasida**. 
 
 As mentioned in the beginning of this `README`, endophytes have strong selective pressure due to thier life cycle. The rate of evolutionary change and divergence is concordingly much faster which results with them being so divergent. Noteworthy, if we had relaxed the thresholds of BUSCO we could probably have achieved orthologous genes between them all. 
+
+When i include fragmented hits for **Tg** we do find 10 orthologous genes.
+
+```
+# Get fragmented
+cat 12_BUSCO-ORTHO/BUSCO_Tg-clean.faa/run_apicomplexa_odb10/full_table.tsv | grep "Fragmented" | cut -f1 > 12_BUSCO-ORTHO/Tg_frag.txt
+
+# Append all the BUSCOS
+cat 12_BUSCO-ORTHO/all_BUSCO-ID.txt >> 12_BUSCO-ORTHO/Tg_frag.txt
+
+# Which BUSCO ids have 8 counts.
+cat Tg_frag.txt | sort | uniq -c | grep -w "8" 
+      8 11034at5794
+      8 13789at5794
+      8 17412at5794
+      8 19039at5794
+      8 22083at5794
+      8 24759at5794
+      8 25958at5794
+      8 27384at5794
+      8 32865at5794
+      8 3730at5794
+```
+
+Lets check which genes these are.
+
+```
+# Store these orthologs
+cat Tg_frag.txt | sort | uniq -c | grep -w "8" | awk '{print $2}' > 12_BUSCO-ORTHO/ALL-SHARE-ORTHO.txt
+
+# Lets get the names
+cat 12_BUSCO-ORTHO/BUSCO_Tg-clean.faa/run_apicomplexa_odb10/full_table.tsv | grep -f ALL-SHARE-ORTHO.txt | cut -f1,7
+
+  3730at5794      Radical SAM
+  11034at5794     Glycylpeptide N-tetradecanoyltransferase
+  13789at5794     ATPase, V1 complex, subunit H
+  17412at5794     Glycosyl transferase, family 1
+  19039at5794     Ribonuclease
+  22083at5794     TATA-box binding protein
+  24759at5794     tRNA (adenine(58)-N(1))-methyltransferase
+  25958at5794     Uracil-DNA glycosylase
+  27384at5794     Dim1 family
+  32865at5794     Ran-interacting Mog1 protein
+```
+Without prior knowledge ATpase, Ribonuclease, TATA-box and tRNA sure does sound like important genes to conserve. Lets use these 10 to generate a phylogenetic tree!
+
+#### Generating FASTA files for each BUSCO
+We have the shared BUSCO IDs, and with the `full_table.tsv` we can get the corresponding contigs.
+
+```
+#!/bin/bash
+
+phylo="13_PHYLO-FASTA"
+dir="12_BUSCO-ORTHO"
+tsv="run_apicomplexa_odb10/full_table.tsv"
+
+mkdir -p $phylo
+
+# Read through the BUSCO IDs
+while read -r id; do
+
+  # Append each sequence record for each taxa to BUSCO ID fasta file.
+  for taxa in Ht Pb Pc Pf Pk Pv Py Tg; do
+
+    # Get the header
+    header=$(cat $dir/BUSCO_$taxa-clean.faa/$tsv | grep $id | cut -f3)
+    
+    # Get name of gene without whitespace or parantheses
+    name=$(cat $dir/BUSCO_$taxa-clean.faa/$tsv | grep $id | cut -f7 | \
+      tr " " "_" | sed "s/[()]//g")
+
+    fasta="10_FASTA-GENES/$taxa-clean.faa"
+
+    # Append the fasta record (header + sequence)
+    cat $fasta | grep -A 1 -w "^>$header" >> "${phylo}/${id}_${name}.faa"
+  
+  done
+done < $dir/ALL-SHARE-ORTHO.txt
+```
+
+
+
 

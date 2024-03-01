@@ -8,6 +8,6 @@ cat 12_BUSCO-ORTHO/BUSCO_$taxa-clean.faa/$tsv | grep -w "Complete" | \
 
 done
 
-numb=$(cat 12_BUSCO-ORTHO/all_BUSCO-ID.txt | sort | uniq -c | grep -c -w "7")
+numb=$(cat 12_BUSCO-ORTHO/no-Tg_BUSCO-ID.txt | sort | uniq -c | grep -c -w "7")
 
 echo "  Number of orthologous genes shared: $numb"
