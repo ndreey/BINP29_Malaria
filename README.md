@@ -838,6 +838,27 @@ done
 ```
 After running and investigating the trees, we find these two to be the best scored. The other trees had either similar structure (but less score) or very different.
 
-![Best tree](figures/Glycosyl_transferase_family_1.png)
+![Best tree](figures/FINAL_Glycosyl_transferase_family_1.png)
 
 ![Best according to papers](figures/FINAL_Ran-interacting_Mog1_protein.png)
+
+
+
+```
+
+                          +---------------Pf
+                  +--2.00-|
+                  |       |       +-------Pb
+                  |       +--10.0-|
+          +--5.00-|               +-------Py
+          |       |
+          |       |               +-------Pc
+          |       |       +--4.00-|
+  +-------|       +--9.00-|       +-------Pv
+  |       |               |
+  |       |               +---------------Pk
+  |       |
+  |       +-------------------------------Tg
+  |
+  +---------------------------------------Ht
+```
