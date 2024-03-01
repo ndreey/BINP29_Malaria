@@ -15,6 +15,7 @@ proteinortho            6.3.1           bioconda
 busco                   5.6.1           bioconda
 clustalo                1.2.4           bioconda
 iqtree                  2.2.6           bioconda
+phylip                  3.697           bioconda
 ```
 
 ## Setting the scene
@@ -838,12 +839,34 @@ done
 ```
 After running and investigating the trees, we find these two to be the best scored. The other trees had either similar structure (but less score) or very different.
 
+_Best scoring tree_
 ![Best tree](figures/FINAL_Glycosyl_transferase_family_1.png)
 
+_Similar to-date phylogeny: [10.1186/s12936-022-04130-9](https://malariajournal.biomedcentral.com/articles/10.1186/s12936-022-04130-9)_
 ![Best according to papers](figures/FINAL_Ran-interacting_Mog1_protein.png)
 
 
+### Lets use our 10 trees to generate a consensus
+We will use `phylip` to generate this.
 
+First lets put all trees into one file.
+```
+mkdir -p 16_CONSENSUS-TREE
+
+# Copy all files to new directory
+find ~/02_binp29/BINP29_Malaria/15_IQTREE/ -type f -name "*.contree" -exec cp {} 16_CONSENSUS-TREES/ \;
+
+# Concatenate them to one tree.
+cat 16_CONSENSUS-TREES/* > 16_CONSENSUS-TREES/ALL-TREES.contree
+
+# Fix names to only have species.
+sed 's/[0-9]*_g_//g' 16_CONSENSUS-TREES/ALL-TREES.contree > 16_CONSENSUS-TREES/FIXED-ALL-TREES.contree
+```
+
+Then we run `phylip consense` and follow the instructions.
+It generates two files, `outfile` and `outtree`
+
+_outfile_
 ```
 
                           +---------------Pf
