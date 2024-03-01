@@ -840,4 +840,10 @@ After running and investigating the trees, we find these two to be the best scor
 
 ![Best tree](figures/Glycosyl_transferase_family_1.png)
 
-![Best according to papers](figures/Ran-interacting_Mog1_protein.png)
+![Best according to papers](figures/RAN-INTERACTING.png)
+
+Lets try getting a consensus for all trees using the `consensus` command from `phylip`.
+
+```
+
+```

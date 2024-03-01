@@ -1,0 +1,56 @@
+#nexus
+
+BEGIN Taxa;
+DIMENSIONS ntax=8;
+TAXLABELS
+[1] '2155_g_Ht'
+[2] '3052_g_Pb'
+[3] '1767_g_Pc'
+[4] '1408_g_Pf'
+[5] '1814_g_Pk'
+[6] '1738_g_Pv'
+[7] '2506_g_Py'
+[8] '496_g_Tg'
+;
+END; [Taxa]
+
+BEGIN Splits;
+DIMENSIONS ntax=8 nsplits=33;
+FORMAT labels=no weights=yes confidences=no intervals=no;
+MATRIX
+	100	 2,
+	100	 7,
+	98	 2 7,
+	100	 3,
+	100	 5,
+	52	 3 5,
+	100	 6,
+	39	 3 5 6,
+	100	 4,
+	13	 1 2 7 8,
+	6	 1 8,
+	100	 8,
+	100	 1,
+	11	 3 6,
+	64	 1 2 7,
+	43	 6 8,
+	28	 3 6 8,
+	74	 1 2 4 7,
+	5	 5 6 8,
+	10	 4 8,
+	26	 1 4,
+	0	 2 4 7,
+	8	 5 6,
+	5	 3 8,
+	9	 3 5 8,
+	1	 5 8,
+	4	 1 4 8,
+	3	 2 7 8,
+	0	 2 8,
+	1	 7 8,
+	0	 4 6,
+	0	 4 5 6,
+	0	 1 2,
+;
+END; [Splits]
+
