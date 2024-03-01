@@ -4,13 +4,17 @@ Herein, we go back a few years when the origin of _Plasmodium falciparum_ was st
 ## Programs used for this analysis
 All programs were installed through `mamba` except for `GeneMark-ES`. It was already installed on the server.
 ```
-#Name                   Version         Channel
+Program                 Version         Channel
+
 bbmap                   39.06           bioconda
 seqkit                  2.7.0           bioconda
 GeneMark-ES             4.71            N/A
 diamond                 2.1.9           bioconda
 taxonkit                0.15.1          bioconda
+proteinortho            6.3.1           bioconda
 busco                   5.6.1           bioconda
+clustalo                1.2.4           bioconda
+iqtree                  2.2.6           bioconda
 ```
 
 ## Setting the scene
@@ -521,7 +525,7 @@ mkdir 09_CLEAN-GENES/
 gmes_petap.pl --ES --min_contig 3000 --cores 64 --work_dir 09_CLEAN-GENES/ --sequence 07_CLEAN/clean_Ht.fasta
 ```
 
-## Phylogenetic tree analysis
+## Orthologous genes
 To compare the phylogeny we need to determine genes that are present in all taxa and that are somewhat conserved. In essence, we need orthologous genes.
 
 ### FASTA files with genes from each genome
@@ -746,6 +750,7 @@ Without prior knowledge ATpase, Ribonuclease, TATA-box and tRNA sure does sound 
 #### Generating FASTA files for each BUSCO
 We have the shared BUSCO IDs, and with the `full_table.tsv` we can get the corresponding contigs.
 
+*phylo_fasta.sh*
 ```
 #!/bin/bash
 
@@ -764,9 +769,9 @@ while read -r id; do
     # Get the header
     header=$(cat $dir/BUSCO_$taxa-clean.faa/$tsv | grep $id | cut -f3)
     
-    # Get name of gene without whitespace or parantheses
+    # Get name of gene without whitespace or other special characters
     name=$(cat $dir/BUSCO_$taxa-clean.faa/$tsv | grep $id | cut -f7 | \
-      tr " " "_" | sed "s/[()]//g")
+      tr " " "_" | sed "s/[,()]//g")
 
     fasta="10_FASTA-GENES/$taxa-clean.faa"
 
@@ -776,7 +781,63 @@ while read -r id; do
   done
 done < $dir/ALL-SHARE-ORTHO.txt
 ```
+The result after running `phylo_fasta.sh`!
 
+```
+13_PHYLO-FASTA/
+├── 11034at5794_Glycylpeptide_N-tetradecanoyltransferase.faa
+├── 13789at5794_ATPase,_V1_complex,_subunit_H.faa
+├── 17412at5794_Glycosyl_transferase,_family_1.faa
+├── 19039at5794_Ribonuclease.faa
+├── 22083at5794_TATA-box_binding_protein.faa
+├── 24759at5794_tRNA_adenine58-N1-methyltransferase.faa
+├── 25958at5794_Uracil-DNA_glycosylase.faa
+├── 27384at5794_Dim1_family.faa
+├── 32865at5794_Ran-interacting_Mog1_protein.faa
+└── 3730at5794_Radical_SAM.faa
+```
 
+## Phylogenetic analysis
+First we will align using Clustal Omega (`clustalo`) then generate trees with `iqtree`.
 
+*clustalo_run.sh* 
+```
+#!/bin/bash
 
+mkdir -p 14_PHYLO-ALIGN
+
+# Loop through each file in 13_PHYLO-FASTA directory
+for file in 13_PHYLO-FASTA/*; do
+  # Extract the filename without the path and cut on '_'
+  short_name=$(basename "$file" | cut -d "_" -f1,2)
+  
+  # Align
+  clustalo -i "$file" -o "14_PHYLO-ALIGN/${short_name}-align.faa" --auto
+done
+
+```
+
+We will use a MODE-FINDEr by using `-m MFP` which means for `Extended model selection followed by tree inference`. Furthermore, we will do a 1000 bootstraps.
+*iqtree_run.sh*
+```
+#!/bin/bash
+
+mkdir -p 15_IQTREE/
+cd 15_IQTREE/
+
+# Loop through each file
+for file in ../14_PHYLO-ALIGN/*; do
+  # Extract the filename without the path and cut on '_'
+  short_name=$(basename "$file" | cut -d "-" -f1)
+  
+  mkdir -p $short_name
+  
+  # Model
+  iqtree2 -nt 32 -s $file -m MFP -B 1000 --prefix ${short_name}/${short_name}
+done
+```
+After running and investigating the trees, we find these two to be the best scored. The other trees had either similar structure (but less score) or very different.
+
+![Best tree](figures/Glycosyl_transferase_family_1.png)
+
+![Best according to papers](figures/Ran-interacting_Mog1_protein.png)

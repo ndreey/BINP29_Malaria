@@ -15,9 +15,9 @@ while read -r id; do
     # Get the header
     header=$(cat $dir/BUSCO_$taxa-clean.faa/$tsv | grep $id | cut -f3)
     
-    # Get name of gene without whitespace or parantheses
+    # Get name of gene without whitespace or other special characters
     name=$(cat $dir/BUSCO_$taxa-clean.faa/$tsv | grep $id | cut -f7 | \
-      tr " " "_" | sed "s/[()]//g")
+      tr " " "_" | sed "s/[,()]//g")
 
     fasta="10_FASTA-GENES/$taxa-clean.faa"
 
