@@ -1,4 +1,4 @@
-# BINP29 Case Study: The origin of human malaria [EDIT]
+# BINP29 Case Study: The origin of human malaria
 Herein, we go back a few years when the origin of _Plasmodium falciparum_ was still not clear. Answers to questions and our workflow/scripts will be added to this `README`.
 
 ## Programs used for this analysis
@@ -841,9 +841,3 @@ After running and investigating the trees, we find these two to be the best scor
 ![Best tree](figures/Glycosyl_transferase_family_1.png)
 
 ![Best according to papers](figures/FINAL_Ran-interacting_Mog1_protein.png)
-
-Lets try getting a consensus for all trees using the `consensus` command from `phylip`.
-
-```
-
-```
