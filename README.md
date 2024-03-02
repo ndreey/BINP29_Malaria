@@ -839,7 +839,7 @@ done
 ```
 After running and investigating the trees, we find these two to be the best scored. The other trees had either similar structure (but less score) or very different.
 
-_Best scoring tree_
+_Best scoring tree_ (NOTE, subgenus is misslabeled. Pf belongs to _Laverania_)
 ![Best tree](figures/FINAL_Glycosyl_transferase_family_1.png)
 
 _Similar to-date phylogeny: [10.1186/s12936-022-04130-9](https://malariajournal.biomedcentral.com/articles/10.1186/s12936-022-04130-9)_
